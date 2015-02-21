@@ -8,7 +8,7 @@
 #include <getopt.h>
 #include <stdarg.h>
 
-#define STRSIZE 256
+#define STRSIZE 258
 #define DEFAULT_POPULATION_SIZE 100
 #define DEFAULT_START_LEN 10
 #define DEFAULT_POINT_PROB 1
