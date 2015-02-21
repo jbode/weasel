@@ -201,6 +201,7 @@ void getParameters( int argc, char **argv, int *point, int *duplicate,
       char *chk;
       case 'h':
         usage( argv[0], NULL );
+        exit(0);
         break;
 
       case 'p':
