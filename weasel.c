@@ -324,7 +324,7 @@ int main( int argc, char **argv )
   int probTable[] = { 96, 97, 98, 99, 100 };
   char alphabet[STRSIZE] = " abcdefghijklmnopqrstuvwxyz"
                             "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-                            "0123456789,.?!";
+                            "0123456789,.';:?!";
   char target[STRSIZE] = "Methinks it is like a weasel";
   struct weasel fittest = {"", 0, 0};
   size_t popSize = DEFAULT_POPULATION_SIZE;
