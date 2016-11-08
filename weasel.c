@@ -78,7 +78,7 @@ void setupProbTable( int *probTable, int point, int duplicate, int delete,
                      int transpose )
 {
   int probSum = point + duplicate + delete + transpose;
-  probTable[NO_CHANGE] = probSum;
+  probTable[NO_CHANGE] = 100 - probSum;
   probTable[POINT_CHANGE] = probTable[NO_CHANGE] + point;
   probTable[DUPLICATE] = probTable[POINT_CHANGE] + duplicate;
   probTable[DELETE] = probTable[DUPLICATE] + delete;
@@ -397,7 +397,7 @@ int main( int argc, char **argv )
       size_t breedPopSize = popSize / 10;
       for ( size_t i = breedPopSize; i < popSize; i++ )
       {
-        population[i].mutRate = mutate( population[i%10].str, 
+        population[i].mutRate = mutate( population[i%breedPopSize].str, 
                                         population[i].str, probTable, 
                                         alphabet );
         population[i].score = score( population[i].str, target );
