@@ -15,6 +15,7 @@
 #define DEFAULT_DUPLICATE_PROB 1
 #define DEFAULT_DELETE_PROB 1
 #define DEFAULT_TRANSPOSE_PROB 1
+#define DEFAULT_TARGET_STRING "methinks it is like a weasel"
 
 /**
  * Possible mutation events.  
@@ -169,18 +170,18 @@ void usage( const char *progName, const char *error )
     "mutation probabilities must sum to less than or equal to 100\n"
     "\n"
     "search parameters:\n"
-    "  -S n   - population size; n must be an integer greater than 10 (default is 100)\n"
-    "  -T str - target string (default is \"methinks it is like a weasel\")\n"
+    "  -S n   - population size; n must be an integer greater than 10 (default is %d)\n"
+    "  -T str - target string (default is \"%s\")\n"
     "  -A str - alphabet for new strings (default is a-ZA-Z0-9,.?!)\n"
-    "  -l n   - initial string size (default is 10)\n"
+    "  -l n   - initial string size (default is %d)\n"
     "\n"
     "logging parameters\n"
-    "  -L logfile - writes detailed logging information to logfile (default is no detailed logging\n";
+    "  -L logfile - writes detailed logging information to logfile (default is no detailed logging)\n";
 
   if ( error != NULL && strcmp( error, "" ) != 0 )
     fprintf( stderr, "ERROR: %s\n", error );
     
-  fprintf( stderr, msg, progName, progName );
+  fprintf( stderr, msg, progName, progName, DEFAULT_POPULATION_SIZE, DEFAULT_TARGET_STRING, DEFAULT_START_LEN );
   exit( 0 );
 }
 
