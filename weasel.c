@@ -16,6 +16,9 @@
 #define DEFAULT_DELETE_PROB 1
 #define DEFAULT_TRANSPOSE_PROB 1
 #define DEFAULT_TARGET_STRING "methinks it is like a weasel"
+#define DEFAULT_ALPHABET " abcdefghijklmnopqrstuvwxyz" \
+                         "ABCDEFGHIJKLMNOPQRSTUVWXYZ" \
+			 "0123456789.,?!'"
 
 /**
  * Possible mutation events.  
@@ -172,7 +175,7 @@ void usage( const char *progName, const char *error )
     "search parameters:\n"
     "  -S n   - population size; n must be an integer greater than 10 (default is %d)\n"
     "  -T str - target string (default is \"%s\")\n"
-    "  -A str - alphabet for new strings (default is a-ZA-Z0-9,.?!)\n"
+    "  -A str - alphabet for new strings (default is \"%s\")\n"
     "  -l n   - initial string size (default is %d)\n"
     "\n"
     "logging parameters\n"
@@ -181,7 +184,7 @@ void usage( const char *progName, const char *error )
   if ( error != NULL && strcmp( error, "" ) != 0 )
     fprintf( stderr, "ERROR: %s\n", error );
     
-  fprintf( stderr, msg, progName, progName, DEFAULT_POPULATION_SIZE, DEFAULT_TARGET_STRING, DEFAULT_START_LEN );
+  fprintf( stderr, msg, progName, progName, DEFAULT_POPULATION_SIZE, DEFAULT_TARGET_STRING, DEFAULT_ALPHABET, DEFAULT_START_LEN );
   exit( 0 );
 }
 
@@ -323,10 +326,8 @@ int main( int argc, char **argv )
   int delete = DEFAULT_DELETE_PROB;
   int transpose = DEFAULT_TRANSPOSE_PROB;
   int probTable[] = { 96, 97, 98, 99, 100 };
-  char alphabet[STRSIZE] = " abcdefghijklmnopqrstuvwxyz"
-                            "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-                            "0123456789,.';:?!";
-  char target[STRSIZE] = "Methinks it is like a weasel";
+  char alphabet[STRSIZE] = DEFAULT_ALPHABET;
+  char target[STRSIZE] = DEFAULT_TARGET_STRING;
   struct weasel fittest = {"", 0, 0};
   size_t popSize = DEFAULT_POPULATION_SIZE;
   unsigned long generation = 0UL;
