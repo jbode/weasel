@@ -4,9 +4,7 @@
 #include <string.h>
 #include <time.h>
 #include <ctype.h>
-#include <unistd.h>
 #include <getopt.h>
-#include <stdarg.h>
 
 #define STRSIZE 258
 #define DEFAULT_POPULATION_SIZE 100
@@ -283,12 +281,7 @@ int cmpWeasel( const void *l, const void *r )
   const struct weasel *lw = l;
   const struct weasel *rw = r;
 
-  if ( lw->score < rw->score )
-    return -1;
-  else if (lw->score > rw->score )
-    return 1;
-  else
-    return 0;
+  return lw->score - rw->score;
 }
 
 /**
