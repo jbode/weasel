@@ -263,6 +263,79 @@ void getParameters( int argc, char **argv, int *point, int *duplicate,
   }
 }
 
+void getParametersQueryString( int *point, int *duplicate, int *delete, int *transpose,
+                               size_t *popSize, char *target, char *alphabet, int *len )
+{
+  fprintf( stderr, "checking for query string\n" );
+
+  if ( getenv( "QUERY_STRING" ) )
+  {
+    char *start = getenv( "QUERY_STRING" );
+
+    char *tmp = malloc( strlen( start ) + 1 );
+    strcpy( tmp, start );
+
+    char *keyvals[8] = {NULL};
+    size_t i = 0;
+
+    keyvals[0] = strtok( tmp, "&" );
+    while ( i < 8 && keyvals[i] )
+      keyvals[++i] = strtok( NULL, "&" );
+
+    for ( i = 0; i < 8 && keyvals[i]; i++ )
+    {
+      char *key = strtok( keyvals[i], "=" );
+      char *value = strtok( NULL, "=" );
+
+      fprintf( stderr, "key = %s, value = %s\n", key, value );
+
+      if ( !strcmp( key, "target" ) )
+      {
+        char *nxt = value;
+        while ( (nxt = strchr( nxt, '+' ) ) )
+          *nxt = ' ';
+        strcpy( target, value );
+      }
+      else if ( !strcmp( key, "alphabet" ) )
+      {
+        char *nxt = value;
+        while ( ( nxt = strchr( nxt, '+' ) ) )
+          *nxt = ' ';
+        strcpy( alphabet, value );
+      }
+      else if ( !strcmp( key, "point" ) )
+      {
+        *point = (int) strtol( value, NULL, 0 );
+      }
+      else if ( !strcmp( key, "duplicate" ) )
+      {
+        *duplicate = (int) strtol( value, NULL, 0 );
+      }
+      else if ( !strcmp( key, "delete" ) )
+      {
+        *delete = (int) strtol( value, NULL, 0 );
+      }      
+      else if ( !strcmp( key, "transpose" ) )
+      {
+        *transpose = (int) strtol( value, NULL, 0 );
+      }
+      else if ( !strcmp( key, "popSize" ) )
+      {
+        *popSize = (size_t) strtoul( value, NULL, 0 );
+      }
+      else if ( !strcmp( key, "startLen" ) )
+      {
+        *len = (int) strtol( value, NULL, 0 );
+      }
+    }
+    free( tmp );
+  }
+  else
+  {
+    fprintf( stderr, "No inputs\n" );
+  }
+}
+
 /**
  * Data type for each weasel
  */
@@ -329,10 +402,41 @@ int main( int argc, char **argv )
   FILE *log = NULL;
   char logName[512] = "weasel.log";
 
-  getParameters( argc, argv, &point, &duplicate, &delete, 
-                 &transpose, &popSize, target, alphabet, &startLen,
-                 &writeLog, logName );
-  
+  if ( getenv( "GATEWAY_INTERFACE" ) != NULL && strcmp( getenv( "GATEWAY_INTERFACE" ), "" ) != 0 )
+  {
+    printf( "Content-type: text/html\r\n\r\n" );
+    printf( "<!DOCTYPE HTML><html><head><title>Pop the Weasel!!!</title>" );
+    printf( "<style>border, th, td { border: 1px solid black; }</style></head>" );
+    printf( "<body><p>This is my particular spin on Dawkins' WEASEL program as descibed in <em>The Blind Watchmaker</em></p>" );
+    printf( "<form action=\"./weasel.cgi\" method=\"get\"><table>" );
+    printf( "<tr><td>Target string</td><td><input type=\"text\" name=\"target\" value=\"%s\"></td></tr>", DEFAULT_TARGET_STRING );
+    printf( "<tr><td>Alphabet</td><td><input type=\"text\" name=\"alphabet\" value=\"%s\"></td></tr>", DEFAULT_ALPHABET );
+    printf( "<tr><td>Point change probability</td><td><input type=\"text\" name=\"point\" value=\"%d\"></td></tr>", DEFAULT_POINT_PROB );
+    printf( "<tr><td>Duplication probability</td><td><input type=\"text\" name=\"duplicate\" value=\"%d\"></td></tr>", DEFAULT_DUPLICATE_PROB );
+    printf( "<tr><td>Deletion probability</td><td><input type=\"text\" name=\"delete\" value=\"%d\"></td></tr>", DEFAULT_DELETE_PROB );
+    printf( "<tr><td>Transposition probability</td><td><input type=\"text\" name=\"transpose\" value=\"%d\"></td></tr>", DEFAULT_TRANSPOSE_PROB );
+    printf( "<tr><td>Population size</td><td><input type=\"text\" name=\"popSize\" value=\"%d\"></td></tr>", DEFAULT_POPULATION_SIZE );
+    printf( "<tr><td>Start string length</td><td><input type=\"text\" name=\"startLen\" value=\"%d\"></td></tr>", DEFAULT_START_LEN );
+    printf( "</table><input type=\"submit\" value=\"Pop That Weasel!\">" );
+    printf( "</form><br><br>" );
+  }
+
+  char *method = getenv( "REQUEST_METHOD" );
+
+  if ( method && strcmp( method, "GET" ) == 0 )
+  {
+    fprintf( stderr, "calling getParametersQueryString\n" );
+
+    getParametersQueryString( &point, &duplicate, &delete, &transpose, 
+                              &popSize, target, alphabet, &startLen );
+  }
+  else
+  {    
+    getParameters( argc, argv, &point, &duplicate, &delete, 
+                   &transpose, &popSize, target, alphabet, &startLen,
+                   &writeLog, logName );
+  }
+
   setupProbTable( probTable, point, duplicate, delete, transpose );
 
   struct weasel *population = malloc( sizeof *population * popSize );
@@ -368,9 +472,15 @@ int main( int argc, char **argv )
      */
     qsort( population, popSize, sizeof *population, cmpWeasel );
 
-    printf( "%15s%15s%8s%s\n", "Generation", "Score", " ", "Value" );
-    printf( "%15s%15s%8s%s\n", "----------", "-----", " ", "-----" );
-
+    if ( getenv( "GATEWAY_INTERFACE" ) && strcmp( getenv( "GATEWAY_INTERFACE" ), "" ) != 0 )
+    {
+      printf( "<table><tr><th>Generation</th><th>Score</th><th>Value</th></tr>" );
+    }
+    else
+    {
+      printf( "%15s%15s%8s%s\n", "Generation", "Score", " ", "Value" );
+      printf( "%15s%15s%8s%s\n", "----------", "-----", " ", "-----" );
+    }
     /**
      * As long as we don't have a match (minimum score is not 0), take the top
      * 10% of the population and make mutated copies of them, writing over the
@@ -383,9 +493,17 @@ int main( int argc, char **argv )
 
       if ( strcmp( fittest.str, population[0].str ))
       {
-        printf( "%15lu%15d%8s%s\n", population[0].generation, 
-                                    population[0].score, " ", 
-                                    population[0].str );
+        if ( getenv( "GATEWAY_INTERFACE" ) && strcmp( getenv( "GATEWAY_INTERFACE" ), "" ) != 0 )
+        {
+          printf( "<tr><td>%lu</td><td>%d</td><td>%s</td></tr>", population[0].generation,
+            population[0].score, population[0].str );
+        }
+        else
+        {
+          printf( "%15lu%15d%8s%s\n", population[0].generation, 
+                                      population[0].score, " ", 
+                                      population[0].str );
+        }
         fittest = population[0];
       }
 
@@ -403,10 +521,23 @@ int main( int argc, char **argv )
 
       qsort( population, popSize, sizeof *population, cmpWeasel );
     }
-    printf( "%15lu%15d%8s%s\n", population[0].generation, 
-                                population[0].score, " ", 
-                                population[0].str );
+    if ( getenv( "GATEWAY_INTERFACE" ) && strcmp( getenv( "GATEWAY_INTERFACE" ), "" ) != 0 )
+    {
+      printf( "<tr><td>%lu</td><td>%d</td><td>%s</td></tr></table>", population[0].generation,
+        population[0].score, population[0].str );
+    }
+    else
+    {
+      printf( "%15lu%15d%8s%s\n", population[0].generation, 
+                                  population[0].score, " ", 
+                                  population[0].str );
+    }
     free( population );    
+
+    if ( getenv( "GATEWAY_INTERFACE" ) && strcmp( getenv( "GATEWAY_INTERFACE" ), "" ) != 0 )
+    {
+      printf( "</body></html>" );
+    }
   }
   if ( writeLog )
     fclose( log );
