@@ -266,50 +266,74 @@ void getParameters( int argc, char **argv, int *point, int *duplicate,
 void getParametersQueryString( int *point, int *duplicate, int *delete, int *transpose,
                                size_t *popSize, char *target, char *alphabet, int *len )
 {
-  char *query = getenv( "QUERY_STRING" );
-  if ( strcmp( query, "" ) == 0 )
-    return;
+  fprintf( stderr, "checking for query string\n" );
 
-  char *keyStart = query;
-  char *keyEnd;
-  char *valueStart;
-  char *valueEnd;
-
-  while( keyStart && *keyStart )
+  if ( getenv( "QUERY_STRING" ) )
   {
-    keyEnd = strchr( keyStart, '=' );
-    valueStart = keyEnd + 1;
-    valueEnd = strchr( valueStart, ';' );
+    char *start = getenv( "QUERY_STRING" );
 
-    char key[50] = {0};
-    char value[128] = {0};
+    char *tmp = malloc( strlen( start ) + 1 );
+    strcpy( tmp, start );
 
-    strncpy( key, keyStart, keyEnd - keyStart );
-    strncpy( value, valueStart, valueEnd - valueStart );
+    char *keyvals[8] = {NULL};
+    size_t i = 0;
 
-    fprintf( stderr, "key = %s, value = %s\n", key, value );
- 
-    if ( strcmp( key, "point" ) == 0 )
-      *point = (int) strtol( value, NULL, 0 );
-    else if ( strcmp( key, "duplicate" ) == 0 )
-      *duplicate = (int) strtol( value, NULL, 0 );
-    else if ( strcmp( key, "delete" ) == 0 )
-      *delete = (int) strtol( value, NULL, 0  );
-    else if ( strcmp( key, "transpose" ) == 0 )
-      *transpose = (int) strtol( value, NULL, 0 );
-    else if ( strcmp( key, "popSize" ) == 0 )
-      *popSize = (size_t) strtoul( value, NULL, 0 );
-    else if ( strcmp( key, "target" ) == 0 )
+    keyvals[0] = strtok( tmp, "&" );
+    while ( i < 8 && keyvals[i] )
+      keyvals[++i] = strtok( NULL, "&" );
+
+    for ( i = 0; i < 8 && keyvals[i]; i++ )
     {
-      strcpy( target, value );
-      for ( size_t i = 0; target[i]; i++ )
-        if ( target[i] == '+' ) target[i] = ' ';
+      char *key = strtok( keyvals[i], "=" );
+      char *value = strtok( NULL, "=" );
+
+      fprintf( stderr, "key = %s, value = %s\n", key, value );
+
+      if ( !strcmp( key, "target" ) )
+      {
+        char *nxt = value;
+        while ( (nxt = strchr( nxt, '+' ) ) )
+          *nxt = ' ';
+        strcpy( target, value );
+      }
+      else if ( !strcmp( key, "alphabet" ) )
+      {
+        char *nxt = value;
+        while ( ( nxt = strchr( nxt, '+' ) ) )
+          *nxt = ' ';
+        strcpy( alphabet, value );
+      }
+      else if ( !strcmp( key, "point" ) )
+      {
+        *point = (int) strtol( value, NULL, 0 );
+      }
+      else if ( !strcmp( key, "duplicate" ) )
+      {
+        *duplicate = (int) strtol( value, NULL, 0 );
+      }
+      else if ( !strcmp( key, "delete" ) )
+      {
+        *delete = (int) strtol( value, NULL, 0 );
+      }      
+      else if ( !strcmp( key, "transpose" ) )
+      {
+        *transpose = (int) strtol( value, NULL, 0 );
+      }
+      else if ( !strcmp( key, "popSize" ) )
+      {
+        *popSize = (size_t) strtoul( value, NULL, 0 );
+      }
+      else if ( !strcmp( key, "startLen" ) )
+      {
+        *len = (int) strtol( value, NULL, 0 );
+      }
     }
-    else if ( strcmp( key, "alphabet" ) == 0 )
-      strcpy( alphabet, value );
-    
-    keyStart = valueEnd + 1;   
-  }     
+    free( tmp );
+  }
+  else
+  {
+    fprintf( stderr, "No inputs\n" );
+  }
 }
 
 /**
@@ -384,23 +408,25 @@ int main( int argc, char **argv )
     printf( "<!DOCTYPE HTML><html><head><title>Pop the Weasel!!!</title>" );
     printf( "<style>border, th, td { border: 1px solid black; }</style></head>" );
     printf( "<body><p>This is my particular spin on Dawkins' WEASEL program as descibed in <em>The Blind Watchmaker</em></p>" );
-    printf( "<form action=\"./weasel.cgi\" method=\"get\">" );
-    printf( "Target string: <input type=\"text\" name=\"target\"><br>");
-    printf( "Alphabet: <input type=\"text\" name=\"alphabet\" value=\"%s\"><br>", DEFAULT_ALPHABET );
-    printf( "Point change probability: <input type=\"text\" name=\"point\" value=\"%d\"><br>", DEFAULT_POINT_PROB );
-    printf( "Duplication probability: <input type=\"text\" name=\"duplicate\" value=\"%d\"><br>", DEFAULT_DUPLICATE_PROB );
-    printf( "Deletion probability: <input type=\"text\" name=\"delete\" value=\"%d\"><br>", DEFAULT_DELETE_PROB );
-    printf( "Transposition probability: <input type=\"text\" name=\"transpose\" value=\"%d\"><br>", DEFAULT_TRANSPOSE_PROB );
-    printf( "Population size: <input type=\"text\" name=\"popSize\" value=\"%d\"><br>", DEFAULT_POPULATION_SIZE );
-    printf( "Start string length: <input type=\"text\" name=\"startLen\" value=\"%d\"><br>", DEFAULT_START_LEN );
-    printf( "<input type=\"submit\" value=\"Pop That Weasel!\">" );
+    printf( "<form action=\"./weasel.cgi\" method=\"get\"><table>" );
+    printf( "<tr><td>Target string</td><td><input type=\"text\" name=\"target\" value=\"%s\"></td></tr>", DEFAULT_TARGET_STRING );
+    printf( "<tr><td>Alphabet</td><td><input type=\"text\" name=\"alphabet\" value=\"%s\"></td></tr>", DEFAULT_ALPHABET );
+    printf( "<tr><td>Point change probability</td><td><input type=\"text\" name=\"point\" value=\"%d\"></td></tr>", DEFAULT_POINT_PROB );
+    printf( "<tr><td>Duplication probability</td><td><input type=\"text\" name=\"duplicate\" value=\"%d\"></td></tr>", DEFAULT_DUPLICATE_PROB );
+    printf( "<tr><td>Deletion probability</td><td><input type=\"text\" name=\"delete\" value=\"%d\"></td></tr>", DEFAULT_DELETE_PROB );
+    printf( "<tr><td>Transposition probability</td><td><input type=\"text\" name=\"transpose\" value=\"%d\"></td></tr>", DEFAULT_TRANSPOSE_PROB );
+    printf( "<tr><td>Population size</td><td><input type=\"text\" name=\"popSize\" value=\"%d\"></td></tr>", DEFAULT_POPULATION_SIZE );
+    printf( "<tr><td>Start string length</td><td><input type=\"text\" name=\"startLen\" value=\"%d\"></td></tr>", DEFAULT_START_LEN );
+    printf( "</table><input type=\"submit\" value=\"Pop That Weasel!\">" );
     printf( "</form><br><br>" );
   }
 
   char *method = getenv( "REQUEST_METHOD" );
 
-  if ( method && strcmp( method, "get" ) == 0 )
+  if ( method && strcmp( method, "GET" ) == 0 )
   {
+    fprintf( stderr, "calling getParametersQueryString\n" );
+
     getParametersQueryString( &point, &duplicate, &delete, &transpose, 
                               &popSize, target, alphabet, &startLen );
   }
