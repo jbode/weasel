@@ -263,17 +263,15 @@ void getParameters( int argc, char **argv, int *point, int *duplicate,
   }
 }
 
-void getParametersQueryString( int *point, int *duplicate, int *delete, int *transpose,
-                               size_t *popSize, char *target, char *alphabet, int *len )
+void getParametersString( const char *str, int *point, int *duplicate, int *delete, int *transpose,
+                          size_t *popSize, char *target, char *alphabet, int *len )
 {
   fprintf( stderr, "checking for query string\n" );
 
-  if ( getenv( "QUERY_STRING" ) )
+  if ( str )
   {
-    char *start = getenv( "QUERY_STRING" );
-
-    char *tmp = malloc( strlen( start ) + 1 );
-    strcpy( tmp, start );
+    char *tmp = malloc( strlen( str ) + 1 );
+    strcpy( tmp, str );
 
     char *keyvals[8] = {NULL};
     size_t i = 0;
@@ -406,18 +404,18 @@ int main( int argc, char **argv )
   {
     printf( "Content-type: text/html\r\n\r\n" );
     printf( "<!DOCTYPE HTML><html><head><title>Pop the Weasel!!!</title>" );
-    printf( "<style>border, th, td { border: 1px solid black; }</style></head>" );
+    printf( "<link rel=\"stylesheet\" href=\"../weasel.css\"></head>" );
     printf( "<body><p>This is my particular spin on Dawkins' WEASEL program as descibed in <em>The Blind Watchmaker</em></p>" );
-    printf( "<form action=\"./weasel.cgi\" method=\"get\"><table>" );
-    printf( "<tr><td>Target string</td><td><input type=\"text\" name=\"target\" value=\"%s\"></td></tr>", DEFAULT_TARGET_STRING );
-    printf( "<tr><td>Alphabet</td><td><input type=\"text\" name=\"alphabet\" value=\"%s\"></td></tr>", DEFAULT_ALPHABET );
-    printf( "<tr><td>Point change probability</td><td><input type=\"text\" name=\"point\" value=\"%d\"></td></tr>", DEFAULT_POINT_PROB );
-    printf( "<tr><td>Duplication probability</td><td><input type=\"text\" name=\"duplicate\" value=\"%d\"></td></tr>", DEFAULT_DUPLICATE_PROB );
-    printf( "<tr><td>Deletion probability</td><td><input type=\"text\" name=\"delete\" value=\"%d\"></td></tr>", DEFAULT_DELETE_PROB );
-    printf( "<tr><td>Transposition probability</td><td><input type=\"text\" name=\"transpose\" value=\"%d\"></td></tr>", DEFAULT_TRANSPOSE_PROB );
-    printf( "<tr><td>Population size</td><td><input type=\"text\" name=\"popSize\" value=\"%d\"></td></tr>", DEFAULT_POPULATION_SIZE );
-    printf( "<tr><td>Start string length</td><td><input type=\"text\" name=\"startLen\" value=\"%d\"></td></tr>", DEFAULT_START_LEN );
-    printf( "</table><input type=\"submit\" value=\"Pop That Weasel!\">" );
+    printf( "<form action=\"./weasel\" method=\"get\">" );
+    printf( "<label for=\"target\">Target string:</label><input type=\"text\" name=\"target\" value=\"%s\"><br>", DEFAULT_TARGET_STRING );
+    printf( "<label for=\"alphabet\">Alphabet:</label><input type=\"text\" name=\"alphabet\" value=\"%s\"><br>", DEFAULT_ALPHABET );
+    printf( "<label for=\"point\">Point change probability:</label><input type=\"text\" name=\"point\" value=\"%d\"><br>", DEFAULT_POINT_PROB );
+    printf( "<label for=\"duplicate\">Duplication probability</label><input type=\"text\" name=\"duplicate\" value=\"%d\"><br>", DEFAULT_DUPLICATE_PROB );
+    printf( "<label for=\"delete\">Deletion probability</label><input type=\"text\" name=\"delete\" value=\"%d\"><br>", DEFAULT_DELETE_PROB );
+    printf( "<label for=\"transpose\">Transposition probability</label><input type=\"text\" name=\"transpose\" value=\"%d\"><br>", DEFAULT_TRANSPOSE_PROB );
+    printf( "<label for=\"popSize\">Population size</label><input type=\"text\" name=\"popSize\" value=\"%d\"><br>", DEFAULT_POPULATION_SIZE );
+    printf( "<label for=\"startLen\">Start string length</label><input type=\"text\" name=\"startLen\" value=\"%d\"><br>", DEFAULT_START_LEN );
+    printf( "<input type=\"submit\" name=\"submitbutton\" id=\"submitbutton\" value=\"Pop That Weasel!\">" );
     printf( "</form><br><br>" );
   }
 
@@ -427,8 +425,8 @@ int main( int argc, char **argv )
   {
     fprintf( stderr, "calling getParametersQueryString\n" );
 
-    getParametersQueryString( &point, &duplicate, &delete, &transpose, 
-                              &popSize, target, alphabet, &startLen );
+    getParametersString( getenv( "QUERY_STRING" ), &point, &duplicate, &delete, &transpose, 
+                        &popSize, target, alphabet, &startLen );
   }
   else
   {    
