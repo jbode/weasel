@@ -406,7 +406,7 @@ int main( int argc, char **argv )
     printf( "<!DOCTYPE HTML><html><head><title>Pop the Weasel!!!</title>" );
     printf( "<link rel=\"stylesheet\" href=\"../weasel.css\"></head>" );
     printf( "<body><p>This is my particular spin on Dawkins' WEASEL program as descibed in <em>The Blind Watchmaker</em></p>" );
-    printf( "<form action=\"./weasel\" method=\"get\">" );
+    printf( "<form action=\"./weasel\" method=\"post\">" );
     printf( "<label for=\"target\">Target string:</label><input type=\"text\" name=\"target\" value=\"%s\"><br>", DEFAULT_TARGET_STRING );
     printf( "<label for=\"alphabet\">Alphabet:</label><input type=\"text\" name=\"alphabet\" value=\"%s\"><br>", DEFAULT_ALPHABET );
     printf( "<label for=\"point\">Point change probability:</label><input type=\"text\" name=\"point\" value=\"%d\"><br>", DEFAULT_POINT_PROB );
@@ -423,10 +423,20 @@ int main( int argc, char **argv )
 
   if ( method && strcmp( method, "GET" ) == 0 )
   {
-    fprintf( stderr, "calling getParametersQueryString\n" );
+    fprintf( stderr, "calling getParametersString with QUERY_STRING\n" );
 
     getParametersString( getenv( "QUERY_STRING" ), &point, &duplicate, &delete, &transpose, 
                         &popSize, target, alphabet, &startLen );
+  }
+  else if ( method && strcmp( method, "POST" ) == 0 )
+  {
+    fprintf( stderr, "calling getParametersString with POST input\n" );
+    char input[2048];
+    if ( fgets( input, sizeof input, stdin ) )
+    {
+      getParametersString( input, &point, &duplicate, &delete, &transpose,
+                           &popSize, target, alphabet, &startLen );
+    }
   }
   else
   {    
