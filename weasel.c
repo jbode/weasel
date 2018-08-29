@@ -445,6 +445,12 @@ int main( int argc, char **argv )
                    &writeLog, logName );
   }
 
+  if ( strspn( target, alphabet ) < strlen( target ) )
+  {
+    usage( argv[0], "Target string contains characters not in the alphabet!" );
+    exit( -1 );
+  }
+
   setupProbTable( probTable, point, duplicate, delete, transpose );
 
   struct weasel *population = malloc( sizeof *population * popSize );
