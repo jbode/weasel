@@ -23,20 +23,20 @@ duplicate = transpose - default_duplicate
 point = duplicate - default_point
 no_change = 95
 
-def randomString( slen ):
+def randomString( slen, alpha ):
   r = []
   for i in xrange( slen ):
-    r.append( random.choice( alphabet ))
+    r.append( random.choice( alpha ))
   s = ''.join( r )
   return s
 
-def mutate( src ):
+def mutate( src, alpha ):
   tmp = []
   mutCount = 0
   for i in xrange( len( src ) ):
     action = random.randint(0,99)
     if action >= point and action < duplicate:
-      tmp.append( random.choice( alphabet ))
+      tmp.append( random.choice( alpha ))
       mutCount += 1
     elif action >= duplicate and action < transpose:
       tmp.append( src[i] )
@@ -89,6 +89,10 @@ def main():
   alphabet = options.alphabet
   target = options.target
 
+  if all( elem in options.alphabet for elem in options.target ) == False:
+    print "Target contains characters not in the alphabet!"
+    return -1;
+    
   delete = 100 - int(options.delete)
   transpose = delete - int(options.transpose)
   duplicate = transpose - int(options.duplicate)
@@ -98,8 +102,8 @@ def main():
   generation = 0
 
   for i in xrange(int(options.size)):
-    candidate = randomString( int(options.length) )
-    population.append( (generation, candidate, score(candidate, target), 0 ))
+    candidate = randomString( int(options.length), options.alphabet )
+    population.append( (generation, candidate, score(candidate, options.target), 0 ))
 
   population.sort( cmpWeasel )
 
@@ -115,8 +119,8 @@ def main():
     breeder_max = int(int(options.size) / 10)
     
     for x in xrange(breeder_max,int(options.size)):
-      candidate, mutRate = mutate( population[x%breeder_max][1] )
-      population[x] = (generation, candidate, score( candidate, target ), mutRate)
+      candidate, mutRate = mutate( population[x%breeder_max][1], options.alphabet )
+      population[x] = (generation, candidate, score( candidate, options.target ), mutRate)
     population.sort( cmpWeasel )
     if population[0][1] != bestFit:
       bestFit = population[0][1]
