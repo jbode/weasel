@@ -250,14 +250,14 @@ function mutate( candidate, prob_table, alphabet )
     {
       arr[w++] = candidate[r];
     }
-    else if ( event < prob_table[1] ) // point change
+    else if ( event >= prob_table[0] && event < prob_table[1] ) // point change
     {
       arr[w++] = alphabet.charAt( Math.random() * alphabet.length );
     }
-    else if ( event < prob_table[2] ) // delete
+    else if ( event >= prob_table[1] && event < prob_table[2] ) // delete
     {
     }
-    else if ( event < prob_table[3] ) // duplicate
+    else if ( event >= prob_table[2] && event < prob_table[3] ) // duplicate
     {
       arr[w++] = candidate[r];
       arr[w++] = candidate[r];
@@ -268,7 +268,7 @@ function mutate( candidate, prob_table, alphabet )
       {
         arr[w++] = candidate[r+1];
       }
-      arr[w++] = candidate[r];     
+      arr[w++] = candidate[r++];     
     }
   }
   return arr.join('');   
