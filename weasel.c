@@ -6,17 +6,17 @@
 #include <ctype.h>
 #include <getopt.h>
 
-#define STRSIZE 258
+#define STRSIZE                 258
 #define DEFAULT_POPULATION_SIZE 100
-#define DEFAULT_START_LEN 10
-#define DEFAULT_POINT_PROB 1
-#define DEFAULT_DUPLICATE_PROB 1
-#define DEFAULT_DELETE_PROB 1
-#define DEFAULT_TRANSPOSE_PROB 1
-#define DEFAULT_TARGET_STRING "methinks it is like a weasel"
-#define DEFAULT_ALPHABET " abcdefghijklmnopqrstuvwxyz" \
-                         "ABCDEFGHIJKLMNOPQRSTUVWXYZ" \
-			 "0123456789.,?!'"
+#define DEFAULT_START_LEN        10
+#define DEFAULT_POINT_PROB        1
+#define DEFAULT_DUPLICATE_PROB    1
+#define DEFAULT_DELETE_PROB       1
+#define DEFAULT_TRANSPOSE_PROB    1
+#define DEFAULT_TARGET_STRING   "methinks it is like a weasel"
+#define DEFAULT_ALPHABET        " abcdefghijklmnopqrstuvwxyz" \
+                                "ABCDEFGHIJKLMNOPQRSTUVWXYZ" \
+			        "0123456789.,?!'"
 
 /**
  * Possible mutation events.  
@@ -80,11 +80,11 @@ void setupProbTable( int *probTable, int point, int duplicate, int delete,
                      int transpose )
 {
   int probSum = point + duplicate + delete + transpose;
-  probTable[NO_CHANGE] = 100 - probSum;
+  probTable[NO_CHANGE]    = 100 - probSum;
   probTable[POINT_CHANGE] = probTable[NO_CHANGE] + point;
-  probTable[DUPLICATE] = probTable[POINT_CHANGE] + duplicate;
-  probTable[DELETE] = probTable[DUPLICATE] + delete;
-  probTable[TRANSPOSE] = probTable[DELETE] + transpose;
+  probTable[DUPLICATE]    = probTable[POINT_CHANGE] + duplicate;
+  probTable[DELETE]       = probTable[DUPLICATE] + delete;
+  probTable[TRANSPOSE]    = probTable[DELETE] + transpose;
 }
 
 /**
@@ -402,6 +402,10 @@ int main( int argc, char **argv )
 
   if ( getenv( "GATEWAY_INTERFACE" ) != NULL && strcmp( getenv( "GATEWAY_INTERFACE" ), "" ) != 0 )
   {
+    /**
+     * We were invoked by a Web client through the Common Gateway Interface, so we need to
+     * create an HTML form for input.
+     */
     printf( "Content-type: text/html\r\n\r\n" );
     printf( "<!DOCTYPE HTML><html><head><title>Pop the Weasel!!!</title>" );
     printf( "<link rel=\"stylesheet\" href=\"../weasel.css\"></head>" );
@@ -423,6 +427,10 @@ int main( int argc, char **argv )
 
   if ( method && strcmp( method, "GET" ) == 0 )
   {
+    /**
+     * We were invoked via an HTTP GET method, so we pull the input parameters
+     * from the QUERY_STRING environment variable.
+     */
     fprintf( stderr, "calling getParametersString with QUERY_STRING\n" );
 
     getParametersString( getenv( "QUERY_STRING" ), &point, &duplicate, &delete, &transpose, 
@@ -430,6 +438,10 @@ int main( int argc, char **argv )
   }
   else if ( method && strcmp( method, "POST" ) == 0 )
   {
+    /**
+     * We were invoked via an HTTP POST method, so we pull the input parameters
+     * from the standard input streaqm.
+     */
     fprintf( stderr, "calling getParametersString with POST input\n" );
     char input[2048];
     if ( fgets( input, sizeof input, stdin ) )
@@ -440,19 +452,32 @@ int main( int argc, char **argv )
   }
   else
   {    
+    /**
+     * We were invoked from the command line in a terminal session
+     */
     getParameters( argc, argv, &point, &duplicate, &delete, 
                    &transpose, &popSize, target, alphabet, &startLen,
                    &writeLog, logName );
   }
 
+  /**
+   * Make sure the target doesn't contain any characters that are not
+   * in the source character set.
+   */
   if ( strspn( target, alphabet ) < strlen( target ) )
   {
     usage( argv[0], "Target string contains characters not in the alphabet!" );
     exit( -1 );
   }
 
+  /**
+   * Initialize our probability table.
+   */
   setupProbTable( probTable, point, duplicate, delete, transpose );
 
+  /**
+   * Allocate memory for our Weasel population.
+   */
   struct weasel *population = malloc( sizeof *population * popSize );
   if ( population )
   {
