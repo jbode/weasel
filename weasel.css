@@ -1,22 +1,29 @@
-table, tr, th {
+ #outputTable, tr {
   border-style: solid;
   border-width: 1px;
   border-color: black;
   border-collapse: collapse;
+  width: 100%
 }
 
 th {
   background-color: #4caf50;
-  font-family: "Arial";
+  margin-left: 1em;
+  margin-right: 1em;
+  font-family: sans-serif;
+  font-weight: bold;
+  font-size: 14;
 }
 
 td {
   border-style: solid;
   border-width: 1px;
   border-color: black;
-  font-family: "Courier New";
-  margin-left: 15px;
-  margin-right: 15px;
+  font-family: monospace;
+  font-weight: normal;
+  font-size: 14;
+  margin-left: 2em;
+  margin-right: 2em;
 }
 
 tr:hover {
@@ -28,19 +35,86 @@ tr:nth-child(even) {
 }
 
 input[type=text] {
+  display: inline-block;
   font-family: "Courier New";
-  width: 200px;
+  width: 75%;
+}
+
+input[type=number] {
+  display: inline-block;
+  font-family: "Courier New";
+  width: 75%;
+}
+
+label.formTitle {
+  display: inline;
+  text-align: center;
+  width: 100%;
+  margin-bottom: 20px;
 }
 
 label {
+  display: inline-block;
   float: left;
-  width: 200px;
-  font-family: "Arial";
+  clear: left;
+  text-align: right;
+  width: 25%;
 }
 
-#sumbitbutton {
+input[type=submit] {
+  display: inline-block;
+  width: 100px;
+  margin-left: 120px;
+  margin-top: 5px;
+  width: 90px;
+}
+
+input[type=button] {
+  display: inline-block;
+  width: 100px;
+  margin-left: 120px;
+  margin-top: 5px;
+  width: 90px;
+}
+
+input[type=reset] {
+  display: inline-block;
+  width: 100px;
   margin-left: 120px;
   margin-top: 5px;
   width: 90px;
 }
   
+.formarea {
+  margin-left: 25px;
+  margin-top: 25px;
+  margin-right: 25px;
+  margin-bottom: 25px;
+  border-style: solid;
+  border-width: 1px;
+  border-color: black;
+  width: 80%;
+  display: inline-block;
+}
+
+.explanation {
+  width: 80%;
+  display: inline-block;
+}
+
+.inputForm {
+  margin-left: 25px;
+  margin-right: 25px;
+  margin-top: 25px;
+  margin-bottom: 25px;
+}
+
+#outputarea {
+  margin-left: 25px;
+  margin-right: 25px;
+  margin-top: 25px;
+  margin-bottom: 25px;
+  width: 80%;
+  display: block;
+}
+
