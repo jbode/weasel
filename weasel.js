@@ -180,20 +180,21 @@ function validateInput()
   if ( !result )
   {
     alert( "Target contains characters that are not in the alphabet" );
+    return false;
   }
   var probs = point.valueAsNumber + duplicate.valueAsNumber + del.valueAsNumber + xpose.valueAsNumber;
   if ( probs > 100 )
   {
-    result = false;
     alert( "Probabilities must sum to 100 or less." );
+    return false;
   }
   if ( point.valueAsNumber < 1 || point.valueAsNumber > 97 || 
        duplicate.valueAsNumber < 1 || duplicate.valueAsNumber > 97 || 
        del.valueAsNumber < 1 || del.valueAsNumber > 97 ||
        xpose.valueAsNumber < 1 || xpose.valueAsNumber > 97 )
   {
-    result = false;
     alert( "Probability range must be between 1 and 97" );
+    return false;
   }
   
   if ( point.valueAsNumber > 10 || duplicate.valueAsNumber > 10 || del.valueAsNumber > 10 || xpose.valueAsNumber > 10 )
@@ -203,7 +204,7 @@ function validateInput()
   
   return result;
 }
-  
+
 /**
  * Main driver, triggered by pressing OK on the input form. 
  * Validates the input form, then generates and scores the
@@ -286,8 +287,11 @@ function doWeasel()
   var breeders = Math.floor( population.length / 10 );
   
   var best_fit = population[0].string;
-  
-  while( population[0].score > 0 )
+
+  let start = new Date();
+  var keepGoing = true;
+
+  while( keepGoing && population[0].score > 0 )
   {
     g++;
     for ( p = breeders; p < population.length; p++ )
@@ -309,6 +313,13 @@ function doWeasel()
       cell.innerHTML = population[0].string;
       best_fit = population[0].string;
     }
+    let end = new Date();
+    if ( end - start > 10000 )
+    {
+      keepGoing = confirm( "This run is taking a while - keep going?" );
+      start = end;
+    }
   }  
+
   outputarea.append( table );
 }
