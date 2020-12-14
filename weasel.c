@@ -16,7 +16,7 @@
 #define DEFAULT_TARGET_STRING   "methinks it is like a weasel"
 #define DEFAULT_ALPHABET        " abcdefghijklmnopqrstuvwxyz" \
                                 "ABCDEFGHIJKLMNOPQRSTUVWXYZ" \
-			        "0123456789.,?!'"
+			        "0123456789.,?!\\'"
 
 /**
  * Possible mutation events.  
