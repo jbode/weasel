@@ -36,7 +36,7 @@ only the top 10% of the population is retained and allowed to
 reproduce.  "Fitness" is determined by the difference in character
 encodings between the candidate string and the target; the lower
 the difference, the closer the match.  
-
+```
 USAGE: weasel -h or 
        weasel [mutation parameters] [search parameters] [logging parameters]
 
@@ -57,11 +57,11 @@ search parameters:
 logging parameters
   -L logfile - writes detailed logging information to logfile (default is no detailed logging)
 
-
+```
 Note that detailed logging information can get large in a hurry, especially
 with large population sizes.  
 
-Build using the supplied makefile:
+Build the C version using the supplied makefile:
 
     make weasel
 
