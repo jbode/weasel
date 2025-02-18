@@ -1,8 +1,9 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 import random
 import math
 import optparse
+from datetime import datetime
 
 default_alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-.,!?'\" "
 default_target = "methinks it is like a weasel"
@@ -23,17 +24,25 @@ duplicate = transpose - default_duplicate
 point = duplicate - default_point
 no_change = 95
 
+#
+# Create a random sequence of slen characters
+# taken from the given alphabet
+#
 def randomString( slen, alpha ):
   r = []
-  for i in xrange( slen ):
+  for i in range( slen ):
     r.append( random.choice( alpha ))
   s = ''.join( r )
   return s
 
+#
+# Make a mutated copy of the input string; returns the mutated
+# string and the mutation rate.
+#
 def mutate( src, alpha ):
   tmp = []
   mutCount = 0
-  for i in xrange( len( src ) ):
+  for i in range( len( src ) ):
     action = random.randint(0,99)
     if action >= point and action < duplicate:
       tmp.append( random.choice( alpha ))
@@ -54,23 +63,32 @@ def mutate( src, alpha ):
 
   return ''.join( tmp ), float(mutCount) / float(len( src ))
 
+#
+# Comparison function for sorting the population
+#
 def cmpWeasel( w0, w1 ):
   return w0[2] - w1[2]
 
+#
+# Compute the score of the candidate string
+#
 def score( cand, targ ):
   clen = len( cand )
   tlen = len( targ )
   s = 0
-  for i in xrange( min( clen, tlen ) ):
+  for i in range( min( clen, tlen ) ):
     s += abs( ord( cand[i] ) - ord( targ[i] ) )
   if clen < tlen:
-    for i in xrange( clen, tlen ):
+    for i in range( clen, tlen ):
       s += ord( targ[i] )
   if tlen < clen:
-    for i in xrange( tlen, clen ):
+    for i in range( tlen, clen ):
       s += ord( cand[i] );
   return s
 
+#
+# Main driver
+#
 def main():
   p = optparse.OptionParser()
   p.add_option( '--target', '-T', default=default_target, 
@@ -90,7 +108,7 @@ def main():
   target = options.target
 
   if all( elem in options.alphabet for elem in options.target ) == False:
-    print "Target contains characters not in the alphabet!"
+    print( "Target contains characters not in the alphabet!")
     return -1;
     
   delete = 100 - int(options.delete)
@@ -101,30 +119,34 @@ def main():
   population = []
   generation = 0
 
-  for i in xrange(int(options.size)):
+  for i in range(int(options.size)):
     candidate = randomString( int(options.length), options.alphabet )
     population.append( (generation, candidate, score(candidate, options.target), 0 ))
 
-  population.sort( cmpWeasel )
+  population.sort( key=lambda weasel: weasel[2] )
 
-  print "%15s%15s%15s%8s%s" % ("Generation", "Score", "Mut Rate", " ", "Value")
-  print "%15s%15s%15s%8s%s" % ("----------", "-----", "--------", " ", "-----")
+  print( "%15s%15s%15s%8s%s" % ("Generation", "Score", "Mut Rate", " ", "Value"))
+  print( "%15s%15s%15s%8s%s" % ("----------", "-----", "--------", " ", "-----"))
 
-  print "%15d%15d%15.2f%8s%s" % (population[0][0], population[0][2], population[0][3], " ", population[0][1] )
+  print( "%15d%15d%15.2f%8s%s" % (population[0][0], population[0][2], population[0][3], " ", population[0][1] ))
 
   bestFit = population[0][1]
 
+  startTime = datetime.now()
   while population[0][2] != 0:
     generation += 1
     breeder_max = int(int(options.size) / 10)
     
-    for x in xrange(breeder_max,int(options.size)):
+    for x in range(breeder_max,int(options.size)):
       candidate, mutRate = mutate( population[x%breeder_max][1], options.alphabet )
       population[x] = (generation, candidate, score( candidate, options.target ), mutRate)
-    population.sort( cmpWeasel )
+    population.sort( key=lambda weasel: weasel[2] )
     if population[0][1] != bestFit:
       bestFit = population[0][1]
-      print "%15d%15d%15.2f%8s%s" %( population[0][0], population[0][2], population[0][3], " ", population[0][1])
+      print( "%15d%15d%15.2f%8s%s" %( population[0][0], population[0][2], population[0][3], " ", population[0][1]))
+  endTime = datetime.now()
+  
+  print( "Execution time: %s" %(endTime - startTime) )
 
 if __name__ == '__main__':
   main()

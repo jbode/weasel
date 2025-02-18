@@ -5,6 +5,7 @@
 #include <time.h>
 #include <ctype.h>
 #include <getopt.h>
+#include <sys/time.h>
 
 #define STRSIZE                 258
 #define DEFAULT_POPULATION_SIZE 100
@@ -526,7 +527,10 @@ int main( int argc, char **argv )
      * bottom 90% of the population.  Display the individual with the lowest
      * score (will only be displayed once).
      */
-    while ( population[0].score > 0 )
+    struct timeval startTime, endTime;
+    gettimeofday(&startTime, NULL);
+    
+    while (population[0].score > 0)
     {
       generation++;
 
@@ -571,12 +575,27 @@ int main( int argc, char **argv )
                                   population[0].score, " ", 
                                   population[0].str );
     }
-    free( population );    
+    free( population );
+    gettimeofday(&endTime, NULL);
 
-    if ( getenv( "GATEWAY_INTERFACE" ) && strcmp( getenv( "GATEWAY_INTERFACE" ), "" ) != 0 )
+    if (getenv("GATEWAY_INTERFACE") && strcmp(getenv("GATEWAY_INTERFACE"), "") != 0)
     {
       printf( "</body></html>" );
     }
+
+    const unsigned long usPerHour   = 60L * 60L * 1000000L;
+    const unsigned long usPerMinute = 60L * 1000000L;
+    const unsigned long usPerSec    = 1000000L;
+
+    unsigned long delta = ((((endTime.tv_sec - startTime.tv_sec) * 1000000) + endTime.tv_usec) - startTime.tv_usec);
+    unsigned long hours = delta / usPerHour;
+    delta -= hours * usPerHour;
+    unsigned long minutes = delta / usPerMinute;
+    delta -= minutes * usPerMinute;
+    unsigned long seconds = delta / usPerSec;
+    delta -= seconds * usPerSec;
+
+    printf("Execution time: %lu:%lu:%lu.%lu\n", hours, minutes, seconds, delta);
   }
   if ( writeLog )
     fclose( log );
