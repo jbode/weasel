@@ -370,14 +370,14 @@ void progress( struct weasel *population, size_t popSize, FILE *log,
   column = 0;
   for ( size_t i = 0; i < breedPopSize; i++ )
   {
-    fprintf( log, "%4zu: %7.4f %-*.*s%s", i, population[i].mutRate, width, 
+    fprintf( log, "%4zu: %7.4f %4d %-*.*s%s", i, population[i].mutRate, population[i].score, width, 
       width, population[i].str, ++column % 3 == 0 ? "\n" : "    " );
   }
   fprintf( log, "\n\nProgeny:\n" );
   column = 0;
   for ( size_t i = breedPopSize; i < popSize; i++  )
   {
-    fprintf( log, "%4zu: %7.4f %-*.*s%s", i, population[i].mutRate, width, 
+    fprintf( log, "%4zu: %7.4f %4d %-*.*s%s", i, population[i].mutRate, population[i].score, width, 
       width, population[i].str, ++column % 3 == 0 ? "\n" : "    " );
   }
   fputc( '\n', log );
@@ -511,6 +511,9 @@ int main( int argc, char **argv )
      * Sort the population by score
      */
     qsort( population, popSize, sizeof *population, cmpWeasel );
+
+    if ( writeLog )
+      progress( population, popSize, log, strlen( target ) );
 
     if ( getenv( "GATEWAY_INTERFACE" ) && strcmp( getenv( "GATEWAY_INTERFACE" ), "" ) != 0 )
     {
